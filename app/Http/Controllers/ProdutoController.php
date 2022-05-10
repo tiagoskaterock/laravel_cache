@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Produto;
+use Illuminate\Support\Facades\Cache;
 
 class ProdutoController extends Controller
 {
@@ -14,7 +15,16 @@ class ProdutoController extends Controller
 
     public function index()
     {
-        $produtos = Produto::with("categorias")->get();
+
+        $expiracao = 1; // em minutos 
+
+        $produtos = Cache::remember('todosprodutos', $expiracao, function() {
+            info('passei por aqui');
+            return Produto::with("categorias")->get();            
+        });
+
+        // $produtos = Produto::all();
+
 
         return view('index', [
             'produtos' => $produtos
